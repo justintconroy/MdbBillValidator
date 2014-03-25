@@ -5,7 +5,7 @@ MdbMaster::MdbMaster()
 	MdbPort.begin();
 	while (!MdbPort);
 
-	_validatorFeatureLevel = 0;
+	_validatorFeatureLevel = -1;
 }
 
 void MdbMaster::SendValidatorCommand(unsigned char command)
@@ -65,10 +65,14 @@ int MdbMaster::GetValidatorResponse(unsigned char *response,
 	return 0;
 }
 
+// Getter method for retrieving the feature level of the currently
+// connected bill acceptor/validator. This method must be called after
+// setup has already been called, otherwise the feature level will not
+// be known and this method will return -1 to indicate an error.
 int MdbMaster::GetValidatorFeatureLevel()
 {
 	// Not implemented yet.
-	return 0;
+	return _validatorFeatureLevel;
 }
 
 // Send a reset command to the bill validator. There is no response to
