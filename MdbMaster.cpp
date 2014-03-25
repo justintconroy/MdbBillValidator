@@ -4,26 +4,24 @@ MdbMaster::MdbMaster()
 {
 	MdbPort.begin();
 	while (!MdbPort);
-
-	_validatorFeatureLevel = -1;
 }
 
-void MdbMaster::SendValidatorCommand(unsigned char command)
+void MdbMaster::SendCommand(unsigned char address, unsigned char command)
 {
 	unsigned char dataBytes[1];
 
-	MdbMaster::SendValidatorCommand(command, dataBytes, 0);
+	MdbMaster::SendCommand(address, command, dataBytes, 0);
 
 }
 
-void MdbMaster::SendValidatorCommand(unsigned char command,
+void MdbMaster::SendCommand(unsigned char address, unsigned char command,
 		unsigned char *dataBytes, unsigned int dataByteCount)
 {
 	unsigned char sum = 0;
 
 	// Send the command along with the Bill Validator Address.
-	MdbPort.write(BILL_ADDR | command, 1);
-	sum += BILL_ADDR | command;
+	MdbPort.write(address | command, 1);
+	sum += address | command;
 
 	// Limit the number of data bytes that can be sent for a command
 	// to 34, since the total length of a message, including the
@@ -59,43 +57,26 @@ void MdbMaster::SendValidatorCommand(unsigned char command,
 //    2: NAK
 //    -1: Request retransmit after response timeout
 //    -2: Unrecoverable error, device should probably be reset after this.
-int MdbMaster::GetValidatorResponse(unsigned char *response,
+int MdbMaster::GetResponse(unsigned char *response,
 		unsigned int *numBytes)
 {
 	return 0;
 }
 
-// Getter method for retrieving the feature level of the currently
-// connected bill acceptor/validator. This method must be called after
-// setup has already been called, otherwise the feature level will not
-// be known and this method will return -1 to indicate an error.
-int MdbMaster::GetValidatorFeatureLevel()
-{
-	// Not implemented yet.
-	return _validatorFeatureLevel;
-}
-
-// Send a reset command to the bill validator. There is no response to
-// this command.
-void MdbMaster::SoftResetValidator()
-{
-	SendValidatorCommand(RESET);
-}
-
 // Send an acknowledgement.
-void MdbMaster::SendValidatorAck()
+void MdbMaster::SendAck()
 {
 	MdbPort.write(ACK, 0);
 }
 
 // Send a retransmit request.
-void MdbMaster::SendValidatorRet()
+void MdbMaster::SendRet()
 {
 	MdbPort.write(RET, 0);
 }
 
 // Send a negative acknowledgement.
-void MdbMaster::SendValidatorNak()
+void MdbMaster::SendNak()
 {
 	MdbPort.write(NAK, 0);
 }
@@ -108,11 +89,5 @@ void MdbMaster::HardReset()
 	delay(150);
 	digitalWrite(1, HIGH);
 	delay(150);
-}
-
-int MdbMaster::GetValidatorStatus()
-{
-	SendValidatorCommand(SETUP);
-	return 0;
 }
 
