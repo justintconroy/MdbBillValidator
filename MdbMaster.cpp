@@ -57,9 +57,30 @@ void MdbMaster::SendCommand(unsigned char address, unsigned char command,
 //    2: NAK
 //    -1: Request retransmit after response timeout
 //    -2: Unrecoverable error, device should probably be reset after this.
-int MdbMaster::GetResponse(unsigned char *response,
-		unsigned int *numBytes)
+int MdbMaster::GetResponse(unsigned char *response, unsigned int *numBytes)
 {
+	int index = 0;
+	int lastMode = 0;
+
+	// Wait for some bytes to be available. I should probably add some
+	// sort of timeout here.
+	while (!MdbPort.available());
+
+	// Loop through bytes received until there are either no bytes
+	// available, 36 bytes have been received (max message size),
+	// or a byte with the mode bit set, which signifies the end of
+	// the message.
+	while ((MdbPort.available() > 0)
+			&& (index <= MAX_MSG_SIZE)
+			&& (lastMode == 0))
+	{
+		response[index] = MdbPort.read() & 0xFF;
+		lastMode = (response[index] >> 8) & 0x01;
+		index++;
+	}
+
+	*numBytes = index;
+
 	return 0;
 }
 

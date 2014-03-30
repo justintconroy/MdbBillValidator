@@ -20,6 +20,8 @@
 #define RET 0xAA // Retransmit (VMC only)
 #define NAK 0xFF // Negative Acknowledge
 
+#define MAX_MSG_SIZE 36
+
 class MdbMaster
 {
 	public:
