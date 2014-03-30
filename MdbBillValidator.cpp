@@ -51,3 +51,43 @@ int MdbBillValidator::GetSetup()
 	return 0;
 }
 
+int MdbBillValidator::SetSecurity(unsigned int securitySettings)
+{
+	unsigned char securityBits[2];
+
+	securityBits[0] = securitySettings && 0xFF;
+	securityBits[1] = (securitySettings >> 8) && 0xFF;
+
+	master.SendCommand(BILL_ADDR, SECURITY, securityBits, 2);
+
+	unsigned char response[MAX_MSG_SIZE];
+	unsigned int numBytesReturned;
+	master.GetResponse(response, &numBytesReturned);
+
+	if (numBytesReturned == 0)
+	{
+		// No data returned.
+		return -1;
+	}
+
+	if (numBytesReturned > 1)
+	{
+		// The data received doesn't make any sense...
+		return -2;
+	}
+
+	if (response[0] == NAK)
+	{
+		// Negative acknowledgement received.
+		return -3;
+	}
+
+	if (response[0] == ACK)
+	{
+		return 0;
+	}
+
+	// Unidentifiable response. Needs more debugging.
+	return -4;
+}
+

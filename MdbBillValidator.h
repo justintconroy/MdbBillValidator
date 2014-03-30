@@ -37,20 +37,28 @@ class MdbBillValidator
 	public:
 		MdbBillValidator();
 
-		virtual void SoftReset();
-
 		virtual void SendAck();
 		virtual void SendRet();
 		virtual void SendNak();
 
-		virtual int GetFeatureLevel();
+		virtual void SoftReset();
+
 		virtual int GetSetup();
-		//virtual int SetSecurity(unsigned int);
+		virtual int SetSecurity(unsigned int);
+
 		//virtual int Poll();
+
 		//virtual int SetBillTypes(unsigned int);
+
 		//virtual int ReleaseBillInEscrow();
 		//virtual int RejectBillInEscrow();
+
 		//virtual int GetStackerCount();
+
+		// Expansion Commands
+		//virtual int SendExpansionCommand();
+
+		virtual int GetFeatureLevel();
 };
 
 #endif /* MdbBillValidator_h */
