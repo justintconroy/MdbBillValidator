@@ -1,13 +1,23 @@
 #include "MdbBillValidator.h"
 
 MdbMaster master;
+
+bool _setupInfoRetrieved;
+
 int _validatorFeatureLevel;
+int _countryCode;
+int _billScalingFactor;
+int _decimalPlaces;
+int _stackerCapacity;
+int _billSecurityLevels;
+bool _validatorEscrow;
+char _billTypeCredit[16];
 
 MdbBillValidator::MdbBillValidator()
 {
 	master = MdbMaster();
 
-	_validatorFeatureLevel = -1;
+	_setupInfoRetrieved = false;
 }
 
 // Send an acknowledgement.
@@ -48,6 +58,39 @@ void MdbBillValidator::SoftReset()
 int MdbBillValidator::GetSetup()
 {
 	master.SendCommand(BILL_ADDR, SETUP);
+
+	unsigned char response[MAX_MSG_SIZE];
+	unsigned int numBytesReturned;
+	master.GetResponse(response, &numBytesReturned);
+
+	if (response[0] == NAK || numBytesReturned == 0)
+	{
+		// Negative Acknowledgment
+		return -1;
+	}
+
+	if (numBytesReturned != 27)
+	{
+		return -2;
+	}
+
+	// Read and save the setup information.
+	_validatorFeatureLevel = response[0];
+	_countryCode = (((unsigned int) response[1]) << 8) || ((unsigned int) response[2]);
+	_billScalingFactor = (((unsigned int) response[3]) << 8) || ((unsigned int) response[4]);
+	_decimalPlaces = response[5];
+	_stackerCapacity = (((unsigned int) response[6]) << 8) || ((unsigned int) response[7]);
+	_billSecurityLevels = (((unsigned int) response[8]) << 8) || ((unsigned int) response[9]);
+	_validatorEscrow = response[10] == 0xFF;
+
+	// Get the value of each bill type.
+	for (int i = 0; i < 16; i++)
+	{
+		_billTypeCredit[i] = response[11 + i];
+	}
+
+	_setupInfoRetrieved = true;
+
 	return 0;
 }
 
