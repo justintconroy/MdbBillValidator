@@ -1,9 +1,13 @@
 #include "MdbMaster.h"
 
+unsigned long _commandSentTime;
+
 MdbMaster::MdbMaster()
 {
 	MdbPort.begin();
 	while (!MdbPort);
+
+	_commandSentTime = 0;
 }
 
 void MdbMaster::SendCommand(unsigned char address, unsigned char command)
@@ -40,6 +44,8 @@ void MdbMaster::SendCommand(unsigned char address, unsigned char command,
 
 	// Send checksum.
 	MdbPort.write(sum, 0);
+
+	_commandSentTime = millis();
 }
 
 // Try to read the response after sending a command to the validator.
@@ -54,9 +60,8 @@ void MdbMaster::SendCommand(unsigned char address, unsigned char command,
 // Return Codes:
 //    0: Message returned normally in response parameter reference
 //    1: ACK
-//    2: NAK
-//    -1: Request retransmit after response timeout
-//    -2: Unrecoverable error, device should probably be reset after this.
+//   -1: NAK: Request retransmit after response timeout or NAK recieved.
+//   -2: Unrecoverable error, device should probably be reset after this.
 int MdbMaster::GetResponse(unsigned char *response, unsigned int *numBytes)
 {
 	int index = 0;
@@ -64,7 +69,13 @@ int MdbMaster::GetResponse(unsigned char *response, unsigned int *numBytes)
 
 	// Wait for some bytes to be available. I should probably add some
 	// sort of timeout here.
-	while (!MdbPort.available());
+	while (!MdbPort.available())
+	{
+		if (millis() - _commandSentTime > 5)
+		{
+			return -1;
+		}
+	}
 
 	// Loop through bytes received until there are either no bytes
 	// available, 36 bytes have been received (max message size),
