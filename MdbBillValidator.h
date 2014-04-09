@@ -58,7 +58,17 @@ class MdbBillValidator
 		// Expansion Commands
 		//virtual int SendExpansionCommand();
 
-		virtual int GetFeatureLevel();
+		virtual unsigned int FeatureLevel();
+		virtual unsigned int CountryCode();
+		virtual unsigned int BillScaleFactor();
+		virtual unsigned int DecimalPlaces();
+		virtual unsigned int StackerCapacity();
+		virtual unsigned int BillSecurityLevels();
+		virtual bool EscrowEnabled();
+		virtual unsigned char* BillTypeCredit();
+
+		virtual String ToString();
+
 };
 
 #endif /* MdbBillValidator_h */
