@@ -46,7 +46,7 @@ class MdbBillValidator
 		virtual int GetSetup();
 		virtual int SetSecurity(unsigned int);
 
-		//virtual int Poll();
+		virtual int Poll();
 
 		//virtual int SetBillTypes(unsigned int);
 

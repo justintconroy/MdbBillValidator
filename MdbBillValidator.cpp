@@ -128,6 +128,22 @@ int MdbBillValidator::SetSecurity(unsigned int securitySettings)
 	return -4;
 }
 
+int MdbBillValidator::Poll()
+{
+	master.SendCommand(BILL_ADDR, POLL);
+
+	unsigned char response[MAX_MSG_SIZE];
+	unsigned int numBytesReturned = 0;
+	master.GetResponse(response, &numBytesReturned);
+
+	if (response[0] == NAK || numBytesReturned == 0)
+	{
+		// Negative Acknowledgment
+		return -1;
+	}
+
+	return 0;
+}
 
 // Getter method for retrieving the feature level of the currently
 // connected bill acceptor/validator. This method must be called after
